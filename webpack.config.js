@@ -69,7 +69,7 @@ module.exports = {
       inject: false,
       template: require("html-webpack-template"),
       hash: true,
-      title: "Webpack-tutorial",
+      title: "BTC Playground",
       filename: "index.html",
       appMountId: "app-container",
       // favicon: "assets/fav.png"
