@@ -243,7 +243,7 @@ function AddressGenerator() {
                 ? "Please paste your wallet seed (in Hex)"
                 : helperTextError
             }
-            style={{ marginBottom: "2rem", width: "60vw", maxWidth: "60vw" }}
+            style={{ marginBottom: "2rem" }}
             onChange={(event) => {
               setFocus("seed");
               setAddressConfig({
