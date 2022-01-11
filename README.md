@@ -15,13 +15,13 @@ BTC Playground is a fun place to learn about the creation of BTC address and mne
 
 - [React.js](https://reactjs.org/)
 - [Material UI](https://mui.com/)
-- [Webpack] (https://webpack.js.org/)
-- [axios] (https://axios-http.com/docs/intro)
-- [reduxjs] (https://redux.js.org/)
-- [bip32] (https://github.com/bitcoinjs/bip32)
-- [bip39] (https://github.com/bitcoinjs/bip39)
-- [bitcoinjs-lib] (https://github.com/bitcoinjs/bitcoinjs-lib)
-- [qrcode.react] (https://github.com/zpao/qrcode.react)
+- [Webpack](https://webpack.js.org/)
+- [Axios](https://axios-http.com/docs/intro)
+- [Reduxjs](https://redux.js.org/)
+- [Bip32](https://github.com/bitcoinjs/bip32)
+- [Bip39](https://github.com/bitcoinjs/bip39)
+- [Bitcoinjs-lib](https://github.com/bitcoinjs/bitcoinjs-lib)
+- [QRcode.react](https://github.com/zpao/qrcode.react)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
