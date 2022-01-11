@@ -14,9 +14,14 @@ import {
   Box,
   Container,
   Tooltip,
-  Paper,
   ThemeProvider,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Typography,
 } from "@material-ui/core";
+import Visibility from "@material-ui/icons/Visibility";
+import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import MuiTheme from "../theme/index";
 import { makeStyles } from "@material-ui/core/styles";
 import BtcPlugin from "../plugin/btc_plugin";
@@ -47,6 +52,9 @@ function MnemoicGenerator() {
   const classes = useStyles();
 
   const [tooltipText, setTooltipText] = useState("Copy to clipboard");
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = () => setShowPassword(!showPassword);
 
   const btc = useSelector((state) => state.btc);
   const dispatch = useDispatch();
@@ -58,40 +66,35 @@ function MnemoicGenerator() {
 
   function generateMnemonic() {
     let mnemonic = bip39.generateMnemonic(btc.entropy);
-    dispatch(setMnemonic(mnemonic));
-
     BtcPlugin.mnemonicToSeed(mnemonic)
       .then((bytes) => bytes.toString("hex"))
       .then((seed) => {
+        dispatch(setMnemonic(mnemonic));
         dispatch(setSeed(seed));
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   return (
     <ThemeProvider theme={MuiTheme}>
-      <Paper
-        elevation={3}
-        style={{
-          marginTop: "2rem",
-          marginRight: "10vw",
-          marginLeft: "10vw",
-
-          padding: "2rem",
-          textAlign: "center",
-          // backgroundColor: "#0f0f0f",
-        }}
-      >
-        <h2
-          className="card-title"
-          style={{ fontFamily: "monospace", color: "white" }}
+      <Container style={{ display: "flex", flexDirection: "column" }}>
+        <Box
+          sx={{ minWidth: 120, marginTop: "2rem" }}
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
         >
-          Generate mnemonic
-        </h2>
-        <Box sx={{ minWidth: 120 }}>
-          <FormControl className={classes.formControl} fullWidth>
+          <FormControl
+            className={classes.formControl}
+            style={{ flex: 1, maxWidth: "3vw" }}
+          >
             <InputLabel id="demo-simple-select-label">
-              Select Raw Entropy Words
+              Select word count
             </InputLabel>
             <Select
               labelId="select-label"
@@ -99,6 +102,8 @@ function MnemoicGenerator() {
               value={btc.wordCount}
               onChange={(e) => {
                 dispatch(setWordCount(e.target.value));
+                dispatch(setMnemonic(""));
+                dispatch(setSeed(""));
               }}
             >
               <MenuItem value={12}>12</MenuItem>
@@ -107,69 +112,161 @@ function MnemoicGenerator() {
               <MenuItem value={21}>21</MenuItem>
             </Select>
           </FormControl>
+          <FormControl
+            className={classes.formControl}
+            style={{ flex: 1, maxWidth: "3vw" }}
+          >
+            <InputLabel id="demo-simple-select">Select network</InputLabel>
+            <Select
+              labelId="select-label2"
+              id="select2"
+              value={BtcPlugin.network.name}
+              onChange={(e) => {
+                console.log(BtcPlugin.network);
+
+                BtcPlugin.network = BtcPlugin.networkList.filter(
+                  (_) => _.name == e.target.value
+                )[0];
+                dispatch(setMnemonic(""));
+                dispatch(setSeed(""));
+                console.log(BtcPlugin.network);
+              }}
+            >
+              {BtcPlugin.networkList.length > 0
+                ? BtcPlugin.networkList.map((_, i) => (
+                    <MenuItem key={`network-list-${i}`} value={_.name}>
+                      {_.name}
+                    </MenuItem>
+                  ))
+                : null}
+            </Select>
+          </FormControl>
         </Box>
-        <Container>
+        <Container
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            marginBottom: "1rem",
+          }}
+        >
+          <Typography
+            style={{
+              color: "#10AFAE",
+              textAlign: "start",
+              marginTop: "3rem",
+            }}
+            variant="caption"
+          >
+            Mnemonic
+          </Typography>
           <Tooltip
             title={tooltipText}
             aria-label={tooltipText}
+            disableHoverListener={btc.mnemonic == ""}
             arrow
             onClose={() =>
               setTimeout(() => setTooltipText("Copy to clipboard"), 300)
             }
           >
-            <Button
+            <TextField
               variant="outlined"
-              disabled={btc.mnemonic == ""}
+              type={showPassword ? "text" : "password"}
+              value={btc.mnemonic ? btc.mnemonic : ""}
               style={{
-                height: "5rem",
+                height: "3vw",
                 width: "90%",
                 textTransform: "none",
-                marginTop: "3rem",
                 marginBottom: "3rem",
-                borderColor: "#10AFAE",
+                borderColor: "#fff",
+                color: "#fff",
               }}
               onClick={() => copyToClipboard(btc.mnemonic)}
-            >
-              {btc.mnemonic ? btc.mnemonic : "Wallet Mnemonic"}
-            </Button>
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      style={{
+                        margin: 1,
+                        color: "#fff",
+                      }}
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                    >
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
           </Tooltip>
         </Container>
-        <Container>
+        <Container style={{ display: "flex", flexDirection: "column" }}>
+          <Typography
+            style={{
+              color: "#10AFAE",
+              textAlign: "start",
+              justifySelf: "start",
+            }}
+            variant="caption"
+          >
+            Seed
+          </Typography>
           <Tooltip
             title={tooltipText}
             aria-label={tooltipText}
+            disableHoverListener={btc.seed == ""}
             arrow
             onClose={() =>
               setTimeout(() => setTooltipText("Copy to clipboard"), 300)
             }
           >
-            <Button
+            <TextField
               variant="outlined"
-              disabled={btc.seed == ""}
+              type={showPassword ? "text" : "password"}
+              value={btc.seed ? btc.seed : ""}
               style={{
-                height: "5rem",
+                height: "auto",
                 width: "90%",
                 textTransform: "none",
-                marginTop: "3rem",
                 marginBottom: "3rem",
-                borderColor: "#10AFAE",
                 wordBreak: "break-all",
+                borderColor: "#fff",
+                color: "#fff",
               }}
               onClick={() => copyToClipboard(btc.seed)}
-            >
-              {btc.seed ? btc.seed : "Wallet seed"}
-            </Button>
+              InputProps={{
+                // <-- This is where the toggle button is added.
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      style={{ color: "#fff", margin: 1 }}
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                    >
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
           </Tooltip>
         </Container>
 
         <Button
           variant="contained"
-          style={{ backgroundColor: "#10AFAE" }}
+          style={{
+            backgroundColor: "#10AFAE",
+            borderRadius: 25,
+            maxWidth: "20rem",
+            alignSelf: "center",
+          }}
           onClick={() => dispatch(generateMnemonic())}
         >
           Generate
         </Button>
-      </Paper>
+      </Container>
     </ThemeProvider>
   );
 }

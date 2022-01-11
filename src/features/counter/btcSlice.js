@@ -18,22 +18,9 @@ export const btcSlice = createSlice({
     setWordCount: (state, newWordCount) => {
       state.wordCount = newWordCount.payload;
     },
-    // generateMnemonic: async (state) => {
-    //   let mnemonic = bip39.generateMnemonic(state.entropy);
-
-    //   let seed = await BtcPlugin.mnemonicToSeed(mnemonic)
-    //     .then((bytes) => bytes.toString("hex"))
-    //     .then((seed) => {
-    //       return seed;
-    //     })
-    //     .catch((err) => console.log(err));
-    //   state.mnemonic = mnemonic;
-    //   state.seed = seed;
-    // },
   },
 });
 
-// Action creators are generated for each case reducer function
 export const { setMnemonic, setSeed, setWordCount } = btcSlice.actions;
 
 export default btcSlice.reducer;
