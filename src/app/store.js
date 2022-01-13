@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import counterReducer from "../features/counter/btcSlice";
+import counterReducer from "../features/btcSlice";
 
 export default configureStore({
   reducer: {

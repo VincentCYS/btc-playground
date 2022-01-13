@@ -16,6 +16,7 @@ import {
   MenuItem,
   Backdrop,
   Divider,
+  Grid,
 } from "@material-ui/core";
 import BtcPlugin from "../plugin/btc_plugin";
 import Table from "./table";
@@ -25,7 +26,7 @@ import CropFreeIcon from "@material-ui/icons/CropFree";
 import InfoIcon from "@material-ui/icons/Info";
 import config from "../config/index";
 
-var QRCode = require("qrcode.react");
+let QRCode = require("qrcode.react");
 
 const style = {
   position: "absolute",
@@ -58,7 +59,7 @@ function AddressGenerator() {
       },
     },
   ]);
-  let [publicKey, setPublicKey] = useState("");
+  const [publicKey, setPublicKey] = useState("");
 
   let [addressConfig, setAddressConfig] = useState({
     seed: "",
@@ -126,7 +127,6 @@ function AddressGenerator() {
   const [helperTextError, setHelperTextError] = useState("");
   const [tooltipText, setTooltipText] = useState("Copy to clipboard");
   const [focus, setFocus] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isWalletUsed, setIsWalletUsed] = useState(true);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showMoreAddress, setShowMoreAddress] = useState(false);
@@ -139,7 +139,6 @@ function AddressGenerator() {
     let newPath = derivePathSelectors.paths;
     newPath[i].value = event.target.value;
     setDerivePathSelectors({ paths: newPath });
-
     setAddressConfig({ ...addressConfig, [newPath[i].name]: newPath[i].value });
   };
 
@@ -198,11 +197,6 @@ function AddressGenerator() {
   }
 
   useEffect(() => {
-    // BtcPlugin.mnemonicToSeed(mnemonic)
-    //   .then((seed) => {
-    //     setAddressConfig((prevState) => ({ ...prevState, seed }));
-    //   })
-    //   .catch((err) => console.log(err));
     setAddress([
       {
         legacyAddress: {
@@ -227,7 +221,7 @@ function AddressGenerator() {
   return (
     <ThemeProvider theme={MuiTheme}>
       <Box sx={{ minWidth: 120, marginTop: "3rem" }}>
-        <Container>
+        <Grid spacing={3}>
           <TextField
             error={
               focus == "seed" &&
@@ -315,72 +309,73 @@ function AddressGenerator() {
               }
             />
           ) : null}
-        </Container>
-        {/* =============== START HERE =============== */}
+        </Grid>
         {address.length > 0 && addressConfig.seed != "" ? (
           <Divider
             variant="middle"
             style={{ marginTop: 40, marginBottom: 40, backgroundColor: "#fff" }}
           />
         ) : null}
-        {/* ==================== Account gap limit check ==================== */}
-        {!isWalletUsed ? (
-          <Container
-            style={{
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Typography
-              style={{ color: "#10AFAE", marginRight: 5 }}
-              variant="caption"
-            >
-              Account Gap Limit Checked
-            </Typography>
-            <Tooltip
-              title={
-                "Address gap limit is currently set to 20. If the software hits 20 unused addresses (no transactions associated with that address) in a row, it expects there are no used addresses beyond this point and stops searching the address chain."
-              }
-              arrow
-            >
-              <InfoIcon style={{ color: "#fff" }} />
-            </Tooltip>
-          </Container>
-        ) : null}
-        {/* Show more address checkbox */}
 
-        {addressConfig.seed != "" ? (
-          <Container
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "end",
-              marginTop: 10,
-              marginRight: 5,
-              marginBottom: 10,
-            }}
-          >
-            <Typography
+        <Grid container spacing={3}>
+          {/* Show more address checkbox */}
+          {addressConfig.seed != "" ? (
+            <Container
               style={{
-                color: "#10AFAE",
-                textAlign: "start",
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: 10,
+                marginBottom: 10,
               }}
-              variant="caption"
             >
-              Show 20 addresses
-            </Typography>
-            <Checkbox
-              value={showMoreAddress}
-              style={{ color: "#fff" }}
-              onChange={() => {
-                if (addressConfig.seed != "") {
-                  setAddressCount(addressCount == 1 ? 20 : 1);
-                  setShowMoreAddress(!showMoreAddress);
-                }
-              }}
-            />
-          </Container>
-        ) : null}
+              <Container style={{ alignItems: "center", display: "flex" }}>
+                <Typography
+                  style={{
+                    color: !isWalletUsed ? "#10AFAE" : "red",
+                    marginRight: 5,
+                  }}
+                  variant="caption"
+                >
+                  {/* ==================== Account gap limit check ==================== */}
+                  {!isWalletUsed
+                    ? "Gap limit check passed"
+                    : "Gap limit check failed"}
+                </Typography>
+                <Tooltip
+                  title={
+                    "Address gap limit is currently set to 20. If the software hits 20 unused addresses (no transactions associated with that address) in a row, it expects there are no used addresses beyond this point and stops searching the address chain."
+                  }
+                  arrow
+                >
+                  <InfoIcon style={{ color: "#fff" }} />
+                </Tooltip>
+              </Container>
+              <Container>
+                <Typography
+                  style={{
+                    color: "#10AFAE",
+                    textAlign: "start",
+                  }}
+                  variant="caption"
+                >
+                  Show 20 addresses
+                </Typography>
+                <Checkbox
+                  value={showMoreAddress}
+                  style={{ color: "#fff" }}
+                  onChange={() => {
+                    if (addressConfig.seed != "") {
+                      setAddressCount(addressCount == 1 ? 20 : 1);
+                      setShowMoreAddress(!showMoreAddress);
+                    }
+                  }}
+                />
+              </Container>
+            </Container>
+          ) : null}
+        </Grid>
         {/* show address list */}
         {address.length > 0 ? (
           showMoreAddress && address.length == 20 && addressCount == 20 ? (
@@ -396,7 +391,6 @@ function AddressGenerator() {
 
   function renderTable() {
     let rows = address;
-    console.log(rows);
     rows.map((_) => {
       if (Object.keys(_).length > 0) {
         _.legacyAddress = _.legacyAddress.address || "";
@@ -580,7 +574,7 @@ function AddressGenerator() {
           tempAddress[_].address != "" && addressConfig.seed != "" ? (
             <Container style={{ marginTop: 30, textAlign: "start" }}>
               {/* Address */}
-              <Typography style={{ color: "#10AFAE" }} variant="subtitle1">
+              <Typography style={{ color: "#10AFAE" }} variant="body1">
                 {tempAddress[_].name}
               </Typography>
 
@@ -603,7 +597,7 @@ function AddressGenerator() {
                 >
                   <Typography
                     style={{ color: "#fff", flex: 3 }}
-                    variant="body1"
+                    variant="caption"
                     onClick={() => copyToClipboard(tempAddress[_].address)}
                   >
                     {tempAddress[_].address}
@@ -643,7 +637,6 @@ function AddressGenerator() {
                   </IconButton>
                 </Tooltip>
               </div>
-              {/* Btc Explorer icon buttion */}
             </Container>
           ) : null
         )}
@@ -656,7 +649,7 @@ function AddressGenerator() {
                 textAlign: "start",
                 marginTop: 10,
               }}
-              variant="subtitle1"
+              variant="body1"
             >
               Public key
             </Typography>
@@ -671,7 +664,7 @@ function AddressGenerator() {
             >
               <Typography
                 style={{ color: "#fff", wordBreak: "break-all" }}
-                variant="body1"
+                variant="caption"
                 onClick={() => copyToClipboard(publicKey)}
               >
                 {publicKey}

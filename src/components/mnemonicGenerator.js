@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  setWordCount,
-  setMnemonic,
-  setSeed,
-} from "../features/counter/btcSlice";
+import { setBtc } from "../features/btcSlice";
 import {
   Button,
   FormControl,
@@ -69,11 +65,11 @@ function MnemoicGenerator() {
     BtcPlugin.mnemonicToSeed(mnemonic)
       .then((bytes) => bytes.toString("hex"))
       .then((seed) => {
-        dispatch(setMnemonic(mnemonic));
-        dispatch(setSeed(seed));
+        dispatch(setBtc({ type: "setSeed", payload: seed }));
+        dispatch(setBtc({ type: "setMnemonic", payload: mnemonic }));
       })
       .catch((err) => {
-        console.log(err);
+        alert(err);
       });
   }
 
@@ -101,44 +97,17 @@ function MnemoicGenerator() {
               id="select"
               value={btc.wordCount}
               onChange={(e) => {
-                dispatch(setWordCount(e.target.value));
-                dispatch(setMnemonic(""));
-                dispatch(setSeed(""));
+                dispatch(
+                  setBtc({ type: "setWordCount", payload: e.target.value })
+                );
+                dispatch(setBtc({ type: "setSeed", payload: "" }));
+                dispatch(setBtc({ type: "setMnemonic", payload: "" }));
               }}
             >
               <MenuItem value={12}>12</MenuItem>
               <MenuItem value={15}>15</MenuItem>
               <MenuItem value={18}>18</MenuItem>
               <MenuItem value={21}>21</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl
-            className={classes.formControl}
-            style={{ flex: 1, maxWidth: "3vw" }}
-          >
-            <InputLabel id="demo-simple-select">Select network</InputLabel>
-            <Select
-              labelId="select-label2"
-              id="select2"
-              value={BtcPlugin.network.name}
-              onChange={(e) => {
-                console.log(BtcPlugin.network);
-
-                BtcPlugin.network = BtcPlugin.networkList.filter(
-                  (_) => _.name == e.target.value
-                )[0];
-                dispatch(setMnemonic(""));
-                dispatch(setSeed(""));
-                console.log(BtcPlugin.network);
-              }}
-            >
-              {BtcPlugin.networkList.length > 0
-                ? BtcPlugin.networkList.map((_, i) => (
-                    <MenuItem key={`network-list-${i}`} value={_.name}>
-                      {_.name}
-                    </MenuItem>
-                  ))
-                : null}
             </Select>
           </FormControl>
         </Box>
@@ -262,7 +231,7 @@ function MnemoicGenerator() {
             maxWidth: "20rem",
             alignSelf: "center",
           }}
-          onClick={() => dispatch(generateMnemonic())}
+          onClick={() => generateMnemonic()}
         >
           Generate
         </Button>

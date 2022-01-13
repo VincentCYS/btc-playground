@@ -2,17 +2,17 @@ import React, { useEffect, useState } from "react";
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import { useSelector, useDispatch } from "react-redux";
+import { Box, Tab, Tabs, Paper, Typography } from "@material-ui/core";
 
 import PropTypes from "prop-types";
-import { setMnemonic, setSeed } from "./features/counter/btcSlice";
+import { setBtc } from "./features/btcSlice";
 import BtcPlugin from "./plugin/btc_plugin";
 
 let bip39 = require("bip39");
 
-import { Box, Tab, Tabs, Paper } from "@material-ui/core";
-
 import MnemoicGenerator from "./components/mnemonicGenerator";
 import AddressGenerator from "./components/addressGenerator";
+import MultisigAddress from "./components/multisigAddress";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -46,16 +46,16 @@ function a11yProps(index) {
 function App() {
   const dispatch = useDispatch();
   const btc = useSelector((state) => state.btc);
-  const [value, setValue] = useState(1);
+  const [value, setValue] = useState(2);
 
   function generateMnemonic() {
     let mnemonic = bip39.generateMnemonic(btc.entropy);
-    dispatch(setMnemonic(mnemonic));
+    dispatch(setBtc({ type: "setMnemonic", payload: mnemonic }));
 
     BtcPlugin.mnemonicToSeed(mnemonic)
       .then((bytes) => bytes.toString("hex"))
       .then((seed) => {
-        dispatch(setSeed(seed));
+        dispatch(setBtc({ type: "setSeed", payload: seed }));
       })
       .catch((err) => console.log(err));
   }
@@ -87,18 +87,12 @@ function App() {
         minWidth: "fit-content",
       }}
     >
-      <h2
-        className="card-title"
-        style={{
-          marginTop: "2vh",
-          textAlign: "center",
-          fontFamily: "monospace",
-          color: "#fff",
-        }}
+      <Typography
+        style={{ color: "#10AFAE", textAlign: "center", marginTop: 50 }}
+        variant="body1"
       >
         BTC Playground
-      </h2>
-
+      </Typography>
       <Paper
         elevation={3}
         style={{
@@ -108,6 +102,7 @@ function App() {
           marginRight: "5vw",
           padding: "1rem",
           textAlign: "center",
+          alignSelf: "center",
           maxWidth: 500,
           backgroundColor: "#191b1f",
         }}
@@ -117,8 +112,9 @@ function App() {
             borderBottom: 1,
             borderColor: "divider",
             backgroundColor: "#191b1f",
-            maxWidth: "fit-content",
             alignItems: "center",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <Tabs
@@ -127,8 +123,21 @@ function App() {
             aria-label="basic tabs example"
             TabIndicatorProps={{ style: { background: "#10AFAE" } }}
           >
-            <Tab label="Mnemoic" {...a11yProps(0)} style={{ color: "#fff" }} />
-            <Tab label="Address" {...a11yProps(1)} style={{ color: "#fff" }} />
+            <Tab
+              label="Mnemonic"
+              {...a11yProps(0)}
+              style={{ color: "#fff", fontSize: 12 }}
+            />
+            <Tab
+              label="Address"
+              {...a11yProps(1)}
+              style={{ color: "#fff", fontSize: 12 }}
+            />
+            <Tab
+              label="Multi-sig Address"
+              {...a11yProps(2)}
+              style={{ color: "#fff", fontSize: 12 }}
+            />
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
@@ -136,6 +145,9 @@ function App() {
         </TabPanel>
         <TabPanel value={value} index={1}>
           <AddressGenerator />
+        </TabPanel>
+        <TabPanel value={value} index={2}>
+          <MultisigAddress />
         </TabPanel>
       </Paper>
     </div>

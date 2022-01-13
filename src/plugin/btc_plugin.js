@@ -12,14 +12,17 @@ class BtcPlugin {
     this.networkList = [
       { name: "Mainnet", network: bitcoin.networks.bitcoin },
       { name: "Testnet", network: bitcoin.networks.testnet },
-      { name: "Regtest", network: bitcoin.networks.regtest },
     ];
   }
+
   async getPublicKey(mnemonic, derivePath) {
     return await bip39
       .mnemonicToSeed(mnemonic)
       .then((seed) => {
-        var hdMaster = bip32.fromSeed(seed, this.network.network);
+        var hdMaster = bip32.fromSeed(
+          seed,
+          bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]
+        );
 
         const BTC_xpub = hdMaster.derivePath(derivePath).neutered().toBase58();
         return BTC_xpub;
@@ -42,33 +45,44 @@ class BtcPlugin {
       addr_arr.push(address);
     }
     let result = await axios.get(
-      `${config.btc_api_host}/multiaddr?active=${addr_arr.join("|")}`
+      `${config.btc_api_host}/${
+        this.network.name == "Mainnet" ? "" : "testnet/"
+      }multiaddr?active=${addr_arr.join("|")}`
     );
     return result.data.wallet.n_tx !== 0;
   }
   async getPublicKeyBySeed(addressConfig) {
-    var hdMaster = bip32.fromSeed(
-      Buffer.from(addressConfig.seed, "hex"),
-      this.network.network
-    );
-    const BTC_xpub = hdMaster
-      .derivePath(
-        addressConfig.derivePath
-          ? addressConfig.derivePath
-          : `m/${addressConfig.purpose}'/${addressConfig.network}'/${addressConfig.account}'/${addressConfig.chain}`
-      )
-      .neutered()
-      .toBase58();
-    return BTC_xpub;
+    try {
+      var hdMaster = bip32.fromSeed(
+        Buffer.from(addressConfig.seed, "hex"),
+        bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]
+      );
+      const BTC_xpub = hdMaster
+        .derivePath(
+          addressConfig.derivePath
+            ? addressConfig.derivePath
+            : `m/${addressConfig.purpose}'/${addressConfig.network}'/${addressConfig.account}'/${addressConfig.chain}`
+        )
+        .neutered()
+        .toBase58();
+
+      return BTC_xpub;
+    } catch (err) {
+      throw err;
+    }
   }
   async getLegacyAddress(addressConfig) {
     try {
       const BTC_xpub = await this.getPublicKeyBySeed(addressConfig);
-      const node = bip32.fromBase58(BTC_xpub, this.network.network);
+      const node = bip32.fromBase58(
+        BTC_xpub,
+        bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]
+      );
 
       return bitcoin.payments.p2pkh({
         pubkey: node.derive(addressConfig.index).publicKey,
-        network: this.network.network,
+        network:
+          bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"],
       }).address;
     } catch (err) {
       throw err;
@@ -76,23 +90,31 @@ class BtcPlugin {
   }
   async getBech32Address(addressConfig) {
     const BTC_xpub = await this.getPublicKeyBySeed(addressConfig);
-    const node = bip32.fromBase58(BTC_xpub, this.network.network);
+    const node = bip32.fromBase58(
+      BTC_xpub,
+      bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]
+    );
 
     return bitcoin.payments.p2wpkh({
       pubkey: node.derive(addressConfig.index).publicKey,
-      network: this.network.network,
+      network:
+        bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"],
     }).address;
   }
   async getNestedAddress(addressConfig) {
     const BTC_xpub = await this.getPublicKeyBySeed(addressConfig);
-    const node = bip32.fromBase58(BTC_xpub, this.network.network);
+    const node = bip32.fromBase58(
+      BTC_xpub,
+      bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]
+    );
 
     return bitcoin.payments.p2sh({
       redeem: bitcoin.payments.p2wpkh({
         pubkey: node.derive(addressConfig.index).publicKey,
       }),
 
-      network: this.network.network,
+      network:
+        bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"],
     }).address;
   }
 
@@ -105,6 +127,26 @@ class BtcPlugin {
       .catch((err) => {
         throw err;
       });
+  }
+  async getMultisigAddress(publicKeyArray, m, n, network) {
+    // sort the public key
+    publicKeyArray.sort();
+
+    let publicKeyBufferArray = publicKeyArray.map((publicKey) =>
+      Buffer.from(publicKey, "hex")
+    );
+
+    const p2ms = bitcoin.payments.p2ms({
+      m: m,
+      pubkeys: publicKeyBufferArray,
+      network: bitcoin.networks[network == 0 ? "bitcoin" : "testnet"],
+    });
+    const p2sh = bitcoin.payments.p2sh({
+      redeem: p2ms,
+      network: bitcoin.networks[network == 0 ? "bitcoin" : "testnet"],
+    });
+
+    return p2sh.address;
   }
 }
 
