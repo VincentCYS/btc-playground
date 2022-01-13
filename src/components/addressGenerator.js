@@ -93,11 +93,11 @@ function AddressGenerator() {
         value: 0,
         items: [
           {
-            name: "BTC Mainnet",
+            name: "Mainnet",
             value: 0,
           },
           {
-            name: "BTC Testnet",
+            name: "Testnet",
             value: 1,
           },
         ],
@@ -122,7 +122,6 @@ function AddressGenerator() {
   });
 
   const [qrCode, setQrCode] = useState({});
-
   const [open, setOpen] = useState(false);
   const [helperTextError, setHelperTextError] = useState("");
   const [tooltipText, setTooltipText] = useState("Copy to clipboard");
@@ -134,7 +133,6 @@ function AddressGenerator() {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
   const handleChange = (event, i) => {
     let newPath = derivePathSelectors.paths;
     newPath[i].value = event.target.value;
@@ -148,6 +146,7 @@ function AddressGenerator() {
   }
 
   async function getAddress(tempAddressConfig) {
+    // Get public key seed
     BtcPlugin.getPublicKeyBySeed(tempAddressConfig)
       .then((result) => {
         setPublicKey(result);
@@ -156,12 +155,13 @@ function AddressGenerator() {
         throw err;
       });
 
+    // Check account gap limit
     BtcPlugin.isWalletUsed(tempAddressConfig.seed).then((result) => {
       setIsWalletUsed(result);
     });
 
-    let addressList = [];
     // Get address list
+    let addressList = [];
     for (
       let i = addressConfig.index;
       i < addressConfig.index + addressCount;
@@ -172,6 +172,7 @@ function AddressGenerator() {
       try {
         setHelperTextError("");
 
+        // Get btc address
         addressList.push({
           index: i,
           path: `m/${tempAddressConfig.purpose}'/${tempAddressConfig.network}'/${tempAddressConfig.account}'/${tempAddressConfig.chain}/${tempAddressConfig.index}`,
@@ -222,6 +223,7 @@ function AddressGenerator() {
     <ThemeProvider theme={MuiTheme}>
       <Box sx={{ minWidth: 120, marginTop: "3rem" }}>
         <Grid spacing={3}>
+          {/* ================ Seed textfield ================ */}
           <TextField
             error={
               focus == "seed" &&
@@ -247,7 +249,8 @@ function AddressGenerator() {
             }}
             value={addressConfig.seed}
           />
-          {/* Easy version derive path */}
+
+          {/* ================ Easy version derive path ================ */}
           {showDerivePathSelector()}
 
           <div
@@ -277,7 +280,7 @@ function AddressGenerator() {
             />
           </div>
 
-          {/* Advanced derive path */}
+          {/* ================ Advanced derive path ================ */}
           {showAdvanced ? (
             <TextField
               error={
@@ -318,7 +321,7 @@ function AddressGenerator() {
         ) : null}
 
         <Grid container spacing={3}>
-          {/* Show more address checkbox */}
+          {/* ==================== Show more address checkbox ==================== */}
           {addressConfig.seed != "" ? (
             <Container
               style={{
@@ -376,7 +379,7 @@ function AddressGenerator() {
             </Container>
           ) : null}
         </Grid>
-        {/* show address list */}
+        {/* ==================== show address list ==================== */}
         {address.length > 0 ? (
           showMoreAddress && address.length == 20 && addressCount == 20 ? (
             renderTable()
@@ -389,6 +392,7 @@ function AddressGenerator() {
     </ThemeProvider>
   );
 
+  // Address table
   function renderTable() {
     let rows = address;
     rows.map((_) => {
@@ -400,6 +404,8 @@ function AddressGenerator() {
     });
     return <Table rows={rows} />;
   }
+
+  // Easy version derive path selector
   function showDerivePathSelector() {
     return (
       <Container>
@@ -456,6 +462,7 @@ function AddressGenerator() {
             justifyContent: "center",
           }}
         >
+          {/* Account */}
           <TextField
             error={
               focus == "account" &&
@@ -495,6 +502,7 @@ function AddressGenerator() {
             value={addressConfig.account}
           />
 
+          {/* Address index */}
           <TextField
             error={
               focus == "index" &&
@@ -537,6 +545,7 @@ function AddressGenerator() {
     );
   }
 
+  // Show QR code
   function showModal() {
     return Object.keys(qrCode).length > 0 ? (
       <Modal
@@ -561,6 +570,7 @@ function AddressGenerator() {
     ) : null;
   }
 
+  // Show address list
   function showAddress() {
     let tempAddress = address;
     if (tempAddress.length > 0) {

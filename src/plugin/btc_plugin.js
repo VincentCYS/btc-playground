@@ -31,6 +31,8 @@ class BtcPlugin {
         throw err;
       });
   }
+
+  // Account gap limit check
   async isWalletUsed(seed) {
     let addr_arr = [];
     for (let i = 0; i < 20; i++) {
@@ -51,6 +53,7 @@ class BtcPlugin {
     );
     return result.data.wallet.n_tx !== 0;
   }
+
   async getPublicKeyBySeed(addressConfig) {
     try {
       var hdMaster = bip32.fromSeed(
@@ -71,6 +74,7 @@ class BtcPlugin {
       throw err;
     }
   }
+  // Legacy P2PKH
   async getLegacyAddress(addressConfig) {
     try {
       const BTC_xpub = await this.getPublicKeyBySeed(addressConfig);
@@ -88,6 +92,8 @@ class BtcPlugin {
       throw err;
     }
   }
+
+  // Native segwit / bech32 address
   async getBech32Address(addressConfig) {
     const BTC_xpub = await this.getPublicKeyBySeed(addressConfig);
     const node = bip32.fromBase58(
@@ -101,6 +107,7 @@ class BtcPlugin {
         bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"],
     }).address;
   }
+  // Nested segwit / P2SH
   async getNestedAddress(addressConfig) {
     const BTC_xpub = await this.getPublicKeyBySeed(addressConfig);
     const node = bip32.fromBase58(
@@ -128,6 +135,7 @@ class BtcPlugin {
         throw err;
       });
   }
+
   async getMultisigAddress(publicKeyArray, m, n, network) {
     // sort the public key
     publicKeyArray.sort();

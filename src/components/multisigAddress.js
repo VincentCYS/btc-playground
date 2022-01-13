@@ -70,11 +70,15 @@ function multisigAddress() {
     try {
       setAddress("");
 
+      // Input checking
       if (m <= 0 || m > n || n <= 0) {
         throw "m should be 0 < m <= n";
       }
-      setHelperTextError("");
+      if (publicKeys == "") {
+        throw "Missing public keys";
+      }
 
+      // Generate multi-sig p2sh address
       let mul_address = await BtcPlugin.getMultisigAddress(
         publicKeys.replace(/\s/g, "").split(","),
         m,
@@ -99,6 +103,7 @@ function multisigAddress() {
             justifyContent: "center",
           }}
         >
+          {/* ============= Network selector ============= */}
           <FormControl
             className={classes.formControl}
             style={{ flex: 1, maxWidth: "3vw" }}
@@ -116,6 +121,8 @@ function multisigAddress() {
               <MenuItem value={1}>Testnet</MenuItem>
             </Select>
           </FormControl>
+
+          {/* ============= M and N textfields ============= */}
           <Container
             style={{
               marginBottom: "2rem",
@@ -195,8 +202,12 @@ function multisigAddress() {
             />
           </Container>
 
+          {/* ============= Public key textfield ============= */}
           <FormControl className={classes.formControl} style={{ flex: 1 }}>
             <TextField
+              error={
+                focus == "publicKeys" && (publicKeys == "" || helperTextError)
+              }
               multiline
               aria-label="Public keys"
               variant="outlined"
@@ -204,11 +215,17 @@ function multisigAddress() {
               minRows={5}
               maxRows={Infinity}
               label="Public keys"
-              placeholder="Public keys (a key per row)"
+              placeholder='Public keys (split keys by ",")'
               style={{ flex: 1, marginBottom: 10 }}
               value={publicKeys}
+              helperText={
+                focus == "publicKeys" && helperTextError != ""
+                  ? helperTextError
+                  : ""
+              }
               onChange={(e) => {
                 setAddress("");
+                setFocus("publicKeys");
                 setPublicKeys(e.target.value);
               }}
             />
@@ -299,6 +316,7 @@ function multisigAddress() {
     </ThemeProvider>
   );
 
+  // QR code modal
   function showModal() {
     return Object.keys(qrCode).length > 0 ? (
       <Modal

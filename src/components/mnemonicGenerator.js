@@ -56,8 +56,10 @@ function MnemoicGenerator() {
   const dispatch = useDispatch();
 
   async function copyToClipboard(text) {
-    await navigator.clipboard.writeText(text);
-    setTooltipText("Copied!");
+    if (text != "") {
+      await navigator.clipboard.writeText(text);
+      setTooltipText("Copied!");
+    }
   }
 
   function generateMnemonic() {
@@ -85,6 +87,7 @@ function MnemoicGenerator() {
             justifyContent: "center",
           }}
         >
+          {/*  ============== Mnemonic word count selector ============== */}
           <FormControl
             className={classes.formControl}
             style={{ flex: 1, maxWidth: "3vw" }}
@@ -111,6 +114,8 @@ function MnemoicGenerator() {
             </Select>
           </FormControl>
         </Box>
+
+        {/*  ============== Show Mnemonic ============== */}
         <Container
           style={{
             display: "flex",
@@ -150,6 +155,7 @@ function MnemoicGenerator() {
                 color: "#fff",
               }}
               onClick={() => copyToClipboard(btc.mnemonic)}
+              // Show/hide wallet mnemonic
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -170,6 +176,8 @@ function MnemoicGenerator() {
             />
           </Tooltip>
         </Container>
+
+        {/*  ============== Show seed ============== */}
         <Container style={{ display: "flex", flexDirection: "column" }}>
           <Typography
             style={{
@@ -204,8 +212,8 @@ function MnemoicGenerator() {
                 color: "#fff",
               }}
               onClick={() => copyToClipboard(btc.seed)}
+              // Show/hide wallet seed
               InputProps={{
-                // <-- This is where the toggle button is added.
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
