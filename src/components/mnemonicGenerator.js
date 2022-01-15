@@ -64,8 +64,8 @@ function MnemoicGenerator() {
 
   function generateMnemonic() {
     let mnemonic = bip39.generateMnemonic(btc.entropy);
+    console.log(mnemonic);
     BtcPlugin.mnemonicToSeed(mnemonic)
-      .then((bytes) => bytes.toString("hex"))
       .then((seed) => {
         dispatch(setBtc({ type: "setSeed", payload: seed }));
         dispatch(setBtc({ type: "setMnemonic", payload: mnemonic }));

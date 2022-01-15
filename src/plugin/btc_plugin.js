@@ -15,14 +15,11 @@ class BtcPlugin {
     ];
   }
 
-  async getPublicKey(mnemonic, derivePath) {
+  async getPublicKey(mnemonic, network, derivePath, passphrase) {
     return await bip39
-      .mnemonicToSeed(mnemonic)
+      .mnemonicToSeed(mnemonic, passphrase)
       .then((seed) => {
-        var hdMaster = bip32.fromSeed(
-          seed,
-          bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]
-        );
+        let hdMaster = bip32.fromSeed(seed, bitcoin.networks[network]);
 
         const BTC_xpub = hdMaster.derivePath(derivePath).neutered().toBase58();
         return BTC_xpub;
@@ -30,6 +27,17 @@ class BtcPlugin {
       .catch((err) => {
         throw err;
       });
+  }
+  async getPrivateKey(seed, network, derivePath) {
+    let hdMaster = bip32.fromSeed(
+      Buffer.from(seed, "hex"),
+      bitcoin.networks[network]
+    );
+
+    const BTC_prv = derivePath
+      ? hdMaster.derivePath(derivePath).toBase58()
+      : hdMaster.toBase58();
+    return BTC_prv;
   }
 
   // Account gap limit check
@@ -56,7 +64,7 @@ class BtcPlugin {
 
   async getPublicKeyBySeed(addressConfig) {
     try {
-      var hdMaster = bip32.fromSeed(
+      let hdMaster = bip32.fromSeed(
         Buffer.from(addressConfig.seed, "hex"),
         bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]
       );
@@ -125,9 +133,10 @@ class BtcPlugin {
     }).address;
   }
 
-  async mnemonicToSeed(mnemonic) {
+  async mnemonicToSeed(mnemonic, passphrase) {
     return await bip39
-      .mnemonicToSeed(mnemonic)
+      .mnemonicToSeed(mnemonic, passphrase)
+      .then((bytes) => bytes.toString("hex"))
       .then((seed) => {
         return seed;
       })

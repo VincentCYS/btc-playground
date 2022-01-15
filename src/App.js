@@ -53,7 +53,6 @@ function App() {
     dispatch(setBtc({ type: "setMnemonic", payload: mnemonic }));
 
     BtcPlugin.mnemonicToSeed(mnemonic)
-      .then((bytes) => bytes.toString("hex"))
       .then((seed) => {
         dispatch(setBtc({ type: "setSeed", payload: seed }));
       })
