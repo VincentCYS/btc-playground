@@ -19,7 +19,7 @@ describe("BTC plugin test", () => {
     for (let i = 0; i < public_key_vectors.length; i++) {
       let privateKey = await Btc_plugin.getPrivateKey(
         public_key_vectors[i][2],
-        "bitcoin"
+        0
       );
       await expect(privateKey).toBe(public_key_vectors[i][3]);
     }
@@ -38,7 +38,7 @@ describe("BTC plugin test", () => {
         // private key
         let privateKey = await Btc_plugin.getPrivateKey(
           bip32_testing[i].seed,
-          "bitcoin",
+          0,
           bip32_testing[i].list[j].chain
         );
 

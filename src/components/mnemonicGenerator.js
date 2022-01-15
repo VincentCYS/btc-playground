@@ -62,17 +62,20 @@ function MnemoicGenerator() {
     }
   }
 
-  function generateMnemonic() {
+  async function generateMnemonic() {
     let mnemonic = bip39.generateMnemonic(btc.entropy);
-    console.log(mnemonic);
-    BtcPlugin.mnemonicToSeed(mnemonic)
-      .then((seed) => {
-        dispatch(setBtc({ type: "setSeed", payload: seed }));
-        dispatch(setBtc({ type: "setMnemonic", payload: mnemonic }));
-      })
-      .catch((err) => {
-        alert(err);
-      });
+
+    try {
+      let seed = await BtcPlugin.mnemonicToSeed(mnemonic);
+      let privateKey = await BtcPlugin.getPrivateKey(seed, 0);
+
+      dispatch(setBtc({ type: "setSeed", payload: seed }));
+      dispatch(setBtc({ type: "setMnemonic", payload: mnemonic }));
+
+      dispatch(setBtc({ type: "setPrivateKey", payload: privateKey }));
+    } catch (err) {
+      alert(err);
+    }
   }
 
   return (
@@ -105,6 +108,7 @@ function MnemoicGenerator() {
                 );
                 dispatch(setBtc({ type: "setSeed", payload: "" }));
                 dispatch(setBtc({ type: "setMnemonic", payload: "" }));
+                dispatch(setBtc({ type: "setPrivateKey", payload: "" }));
               }}
             >
               <MenuItem value={12}>12</MenuItem>
@@ -178,7 +182,13 @@ function MnemoicGenerator() {
         </Container>
 
         {/*  ============== Show seed ============== */}
-        <Container style={{ display: "flex", flexDirection: "column" }}>
+        <Container
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            marginBottom: "3rem",
+          }}
+        >
           <Typography
             style={{
               color: "#10AFAE",
@@ -206,10 +216,13 @@ function MnemoicGenerator() {
                 height: "auto",
                 width: "90%",
                 textTransform: "none",
-                marginBottom: "3rem",
                 wordBreak: "break-all",
                 borderColor: "#fff",
                 color: "#fff",
+              }}
+              onChange={(e) => {
+                dispatch(setBtc({ type: "setSeed", payload: e.target.value }));
+                generateMnemonic();
               }}
               onClick={() => copyToClipboard(btc.seed)}
               // Show/hide wallet seed
@@ -231,6 +244,65 @@ function MnemoicGenerator() {
           </Tooltip>
         </Container>
 
+        {/*  ============== Private key (in base58) ============== */}
+        <Container
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            marginBottom: "6rem",
+          }}
+        >
+          <Typography
+            style={{
+              color: "#10AFAE",
+              textAlign: "start",
+            }}
+            variant="caption"
+          >
+            Private key (in base58)
+          </Typography>
+          <Tooltip
+            title={tooltipText}
+            aria-label={tooltipText}
+            disableHoverListener={btc.mnemonic == ""}
+            arrow
+            onClose={() =>
+              setTimeout(() => setTooltipText("Copy to clipboard"), 300)
+            }
+          >
+            <TextField
+              variant="outlined"
+              type={showPassword ? "text" : "password"}
+              value={btc.privateKey ? btc.privateKey : ""}
+              style={{
+                height: "3vw",
+                width: "90%",
+                textTransform: "none",
+                borderColor: "#fff",
+                color: "#fff",
+              }}
+              onClick={() => copyToClipboard(btc.privateKey)}
+              // Show/hide wallet mnemonic
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      style={{
+                        margin: 1,
+                        color: "#fff",
+                      }}
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                    >
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Tooltip>
+        </Container>
         <Button
           variant="contained"
           style={{

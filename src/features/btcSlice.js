@@ -8,6 +8,7 @@ export const btcSlice = createSlice({
     wordCount: 15,
     mnemonic: "",
     seed: "",
+    privateKey: "",
     network: { name: "Mainnet", network: bitcoin.networks.bitcoin },
   },
   reducers: {
@@ -38,6 +39,12 @@ export const btcSlice = createSlice({
           return {
             ...state,
             network: action.payload,
+          };
+        }
+        case "setPrivateKey": {
+          return {
+            ...state,
+            privateKey: action.payload,
           };
         }
 

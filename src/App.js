@@ -46,7 +46,7 @@ function a11yProps(index) {
 function App() {
   const dispatch = useDispatch();
   const btc = useSelector((state) => state.btc);
-  const [value, setValue] = useState(2);
+  const [value, setValue] = useState(0);
 
   function generateMnemonic() {
     let mnemonic = bip39.generateMnemonic(btc.entropy);

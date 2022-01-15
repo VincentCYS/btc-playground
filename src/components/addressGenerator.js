@@ -60,6 +60,7 @@ function AddressGenerator() {
     },
   ]);
   const [publicKey, setPublicKey] = useState("");
+  const [privateKey, setPrivateKey] = useState("");
 
   let [addressConfig, setAddressConfig] = useState({
     seed: "",
@@ -146,36 +147,23 @@ function AddressGenerator() {
   }
 
   async function getAddress(tempAddressConfig) {
-    // Get public key seed
-    BtcPlugin.getPublicKeyBySeed(tempAddressConfig)
-      .then((result) => {
-        setPublicKey(result);
-      })
-      .catch((err) => {
-        throw err;
-      });
+    let derivePath = `m/${tempAddressConfig.purpose}'/${tempAddressConfig.network}'/${tempAddressConfig.account}'/${tempAddressConfig.chain}/${tempAddressConfig.index}`;
+    try {
+      // Get address list
+      let addressList = [];
+      for (
+        let i = addressConfig.index;
+        i < addressConfig.index + addressCount;
+        i++
+      ) {
+        tempAddressConfig.index = i;
 
-    // Check account gap limit
-    BtcPlugin.isWalletUsed(tempAddressConfig.seed).then((result) => {
-      setIsWalletUsed(result);
-    });
-
-    // Get address list
-    let addressList = [];
-    for (
-      let i = addressConfig.index;
-      i < addressConfig.index + addressCount;
-      i++
-    ) {
-      tempAddressConfig.index = i;
-
-      try {
         setHelperTextError("");
 
         // Get btc address
         addressList.push({
           index: i,
-          path: `m/${tempAddressConfig.purpose}'/${tempAddressConfig.network}'/${tempAddressConfig.account}'/${tempAddressConfig.chain}/${tempAddressConfig.index}`,
+          path: derivePath,
           legacyAddress: {
             name: "Legacy Address",
             address: await BtcPlugin.getLegacyAddress(tempAddressConfig),
@@ -189,12 +177,27 @@ function AddressGenerator() {
             address: await BtcPlugin.getLegacyAddress(tempAddressConfig),
           },
         });
-      } catch (err) {
-        setHelperTextError(err.toString());
-        throw err;
       }
+      setAddress(addressList);
+
+      // Get public key seed
+      setPublicKey(await BtcPlugin.getPublicKeyBySeed(tempAddressConfig));
+
+      // Get private key
+      setPrivateKey(
+        await BtcPlugin.getPrivateKey(
+          tempAddressConfig.seed,
+          tempAddressConfig.network,
+          derivePath
+        )
+      );
+
+      // Check account gap limit
+      setIsWalletUsed(await BtcPlugin.isWalletUsed(tempAddressConfig.seed));
+    } catch (err) {
+      setHelperTextError(err.toString());
+      throw err;
     }
-    setAddress(addressList);
   }
 
   useEffect(() => {
@@ -678,6 +681,38 @@ function AddressGenerator() {
                 onClick={() => copyToClipboard(publicKey)}
               >
                 {publicKey}
+              </Typography>
+            </Tooltip>
+          </Container>
+        ) : null}
+        {/* ==================== Private key (in base58) ==================== */}
+        {privateKey && tempAddress.legacyAddress.address ? (
+          <Container>
+            <Typography
+              style={{
+                color: "#10AFAE",
+                textAlign: "start",
+                marginTop: 10,
+              }}
+              variant="body1"
+            >
+              Private key (in base58)
+            </Typography>
+            <Tooltip
+              title={tooltipText}
+              aria-label={tooltipText}
+              disableHoverListener={privateKey == ""}
+              arrow
+              onClose={() =>
+                setTimeout(() => setTooltipText("Copy to clipboard"), 300)
+              }
+            >
+              <Typography
+                style={{ color: "#fff", wordBreak: "break-all" }}
+                variant="caption"
+                onClick={() => copyToClipboard(privateKey)}
+              >
+                {privateKey}
               </Typography>
             </Tooltip>
           </Container>
