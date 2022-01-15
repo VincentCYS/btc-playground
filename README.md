@@ -22,6 +22,7 @@ BTC Playground is a fun place to learn about the creation of BTC address and mne
 - [Bip39](https://github.com/bitcoinjs/bip39)
 - [Bitcoinjs-lib](https://github.com/bitcoinjs/bitcoinjs-lib)
 - [QRcode.react](https://github.com/zpao/qrcode.react)
+- [Jest](https://jestjs.io/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -45,6 +46,12 @@ npm install
 
 ```
 npm start
+```
+
+4. Test projcet:
+
+```
+npm test
 ```
 
 # Build
