@@ -24,8 +24,6 @@ BTC Playground is a fun place to learn about the creation of BTC address and mne
 - [QRcode.react](https://github.com/zpao/qrcode.react)
 - [Jest](https://jestjs.io/)
 
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 # Installation
 
 We use npm in this project.
@@ -59,3 +57,5 @@ npm test
 ```
 npm run build
 ```
+
+<p align="right">(<a href="#top">back to top</a>)</p>
