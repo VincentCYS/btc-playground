@@ -34,9 +34,10 @@ class BtcPlugin {
       bitcoin.networks[network]
     );
 
-    const BTC_prv = derivePath
-      ? hdMaster.derivePath(derivePath).toBase58()
-      : hdMaster.toBase58();
+    const BTC_prv =
+      derivePath && derivePath != "m"
+        ? hdMaster.derivePath(derivePath).toBase58()
+        : hdMaster.toBase58();
     return BTC_prv;
   }
 
@@ -68,14 +69,18 @@ class BtcPlugin {
         Buffer.from(addressConfig.seed, "hex"),
         bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]
       );
-      const BTC_xpub = hdMaster
-        .derivePath(
-          addressConfig.derivePath
-            ? addressConfig.derivePath
-            : `m/${addressConfig.purpose}'/${addressConfig.network}'/${addressConfig.account}'/${addressConfig.chain}`
-        )
-        .neutered()
-        .toBase58();
+
+      const BTC_xpub =
+        addressConfig.derivePath == "m"
+          ? hdMaster.neutered().toBase58()
+          : hdMaster
+              .derivePath(
+                addressConfig.derivePath
+                  ? addressConfig.derivePath
+                  : `m/${addressConfig.purpose}'/${addressConfig.network}'/${addressConfig.account}'/${addressConfig.chain}`
+              )
+              .neutered()
+              .toBase58();
 
       return BTC_xpub;
     } catch (err) {

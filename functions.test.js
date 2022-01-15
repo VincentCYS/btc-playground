@@ -1,11 +1,12 @@
 // import addressGenerator from "./src/components/addressGenerator";
 const Btc_plugin = require("./src/plugin/btc_plugin");
-const bip32_testing = require("./testingData/bip32_testing.json").vectors;
+const bip32_testing = require("./testingData/bip32_testing.json");
+const bip67_testing = require("./testingData/bip67_testing.json");
 const public_key_vectors = require("./testingData/root_private_key_vectors.json")
   .english;
 
 describe("BTC plugin test", () => {
-  test("Mnemonic To Seed", async () => {
+  test("Convert mnemonic To Seed", async () => {
     for (let i = 0; i < public_key_vectors.length; i++) {
       let seed = await Btc_plugin.mnemonicToSeed(
         public_key_vectors[i][1],
@@ -14,7 +15,7 @@ describe("BTC plugin test", () => {
       await expect(seed).toBe(public_key_vectors[i][2]);
     }
   });
-  test("Private key", async () => {
+  test("Generate root private key", async () => {
     for (let i = 0; i < public_key_vectors.length; i++) {
       let privateKey = await Btc_plugin.getPrivateKey(
         public_key_vectors[i][2],
@@ -23,7 +24,7 @@ describe("BTC plugin test", () => {
       await expect(privateKey).toBe(public_key_vectors[i][3]);
     }
   });
-  test("Extended public and private key", async () => {
+  test("Generate extended public and private key", async () => {
     for (let i = 0; i < bip32_testing.length; i++) {
       for (let j = 0; j < bip32_testing[i].list.length; j++) {
         // public key
@@ -43,6 +44,17 @@ describe("BTC plugin test", () => {
 
         await expect(privateKey).toBe(bip32_testing[i].list[j].prv);
       }
+    }
+  });
+  test("Generate multisig addresses", async () => {
+    for (let i = 0; i < bip67_testing.length; i++) {
+      let address = await Btc_plugin.getMultisigAddress(
+        bip67_testing[i].list,
+        2,
+        bip67_testing[i].list.length,
+        0
+      );
+      await expect(address).toBe(bip67_testing[i].address);
     }
   });
 });
