@@ -1,0 +1,18 @@
+{
+    "printWidth": 400,
+    "tabWidth": 4,
+    "semi": false,
+    "useTabs": true,
+    "trailingComma": "none",
+    "arrowParens": "avoid",
+    "eslint.arrow-parans": "as-needed",
+    "eslint.printWidth": 400,
+    "eslint.semi": false,
+    "eslint.tabWidth": 4,
+    "eslint.useTabs": true,
+    "eslint.space-before-function-paren": "error",
+    "eslint.autoFixOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.tslint": true
+    }
+  }
