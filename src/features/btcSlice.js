@@ -9,7 +9,7 @@ export const btcSlice = createSlice({
 		mnemonic: "",
 		seed: "",
 		privateKey: "",
-		network: { name: "Mainnet", network: bitcoin.networks.bitcoin }
+		network: 0
 	},
 	reducers: {
 		setBtc: (state, action) => {

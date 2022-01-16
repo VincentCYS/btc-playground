@@ -131,7 +131,7 @@ function AddressGenerator() {
 
 	async function getAddress(tempAddressConfig) {
 		let derivePath = tempAddressConfig.derivePath != "" && showAdvanced ? tempAddressConfig.derivePath : `m/${tempAddressConfig.purpose}'/${tempAddressConfig.network}'/${tempAddressConfig.account}'/${tempAddressConfig.chain}/${tempAddressConfig.index}`
-		tempAddressConfig.network = tempAddressConfig.derivePath != "" && showAdvanced ? tempAddressConfig.derivePath.split("/")[2].slice(0, 1) : tempAddressConfig.network
+		tempAddressConfig.network = tempAddressConfig.derivePath != "" && showAdvanced ? parseInt(tempAddressConfig.derivePath.split("/")[2].slice(0, 1)) : tempAddressConfig.network
 		try {
 			// Get address list
 			let addressList = []
@@ -150,11 +150,11 @@ function AddressGenerator() {
 					},
 					nestedAddress: {
 						name: "Segwit Address",
-						address: await BtcPlugin.getLegacyAddress(tempAddressConfig)
+						address: tempAddressConfig.network == 0 ? await BtcPlugin.getNestedAddress(tempAddressConfig) : ""
 					},
 					bech32Address: {
 						name: "Segwit Native Address",
-						address: await BtcPlugin.getLegacyAddress(tempAddressConfig)
+						address: tempAddressConfig.network == 0 ? await BtcPlugin.getBech32Address(tempAddressConfig) : ""
 					}
 				})
 			}
@@ -164,11 +164,14 @@ function AddressGenerator() {
 			setPublicKey(await BtcPlugin.getPublicKeyBySeed(tempAddressConfig))
 
 			// Get private key
-			setPrivateKey(await BtcPlugin.getPrivateKey(tempAddressConfig.seed, tempAddressConfig.network, derivePath))
+			setPrivateKey(await BtcPlugin.getPrivateKey(tempAddressConfig.seed, tempAddressConfig.network, "m"))
 
 			// Check account gap limit
-			setIsWalletUsed(await BtcPlugin.isWalletUsed(tempAddressConfig.seed))
+			setIsWalletUsed(await BtcPlugin.isWalletUsed(tempAddressConfig.seed, tempAddressConfig.network))
 		} catch (err) {
+			err = err.toString().split(": ")
+			console.log(err)
+			err = err.length > 1 ? err[1] : err.join(" ")
 			setHelperTextError(err.toString())
 			throw err
 		}
@@ -529,7 +532,7 @@ function AddressGenerator() {
 						</Container>
 					) : null
 				)}
-				{/* ==================== Public key ==================== */}
+				{/* ==================== BIP32 Extended Public key ==================== */}
 				{publicKey && tempAddress.legacyAddress.address ? (
 					<Container>
 						<Typography
@@ -540,31 +543,11 @@ function AddressGenerator() {
 							}}
 							variant="body1"
 						>
-							Public key
+							BIP32 Extended public key
 						</Typography>
 						<Tooltip title={tooltipText} aria-label={tooltipText} disableHoverListener={publicKey == ""} arrow onClose={() => setTimeout(() => setTooltipText("Copy to clipboard"), 300)}>
 							<Typography style={{ color: "#fff", wordBreak: "break-all" }} variant="caption" onClick={() => copyToClipboard(publicKey)}>
 								{publicKey}
-							</Typography>
-						</Tooltip>
-					</Container>
-				) : null}
-				{/* ==================== Private key (in base58) ==================== */}
-				{privateKey && tempAddress.legacyAddress.address ? (
-					<Container>
-						<Typography
-							style={{
-								color: "#10AFAE",
-								textAlign: "start",
-								marginTop: 10
-							}}
-							variant="body1"
-						>
-							Private key (in base58)
-						</Typography>
-						<Tooltip title={tooltipText} aria-label={tooltipText} disableHoverListener={privateKey == ""} arrow onClose={() => setTimeout(() => setTooltipText("Copy to clipboard"), 300)}>
-							<Typography style={{ color: "#fff", wordBreak: "break-all" }} variant="caption" onClick={() => copyToClipboard(privateKey)}>
-								{privateKey}
 							</Typography>
 						</Tooltip>
 					</Container>

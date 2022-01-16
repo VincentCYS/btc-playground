@@ -7,14 +7,6 @@ const axios = require("axios")
 const config = require("../config/index")
 
 class BtcPlugin {
-	constructor() {
-		this.network = { name: "Mainnet", network: bitcoin.networks.bitcoin }
-		this.networkList = [
-			{ name: "Mainnet", network: bitcoin.networks.bitcoin },
-			{ name: "Testnet", network: bitcoin.networks.testnet }
-		]
-	}
-
 	async getPublicKey(mnemonic, network, derivePath, passphrase) {
 		return await bip39
 			.mnemonicToSeed(mnemonic, passphrase)
@@ -36,20 +28,20 @@ class BtcPlugin {
 	}
 
 	// Account gap limit check
-	async isWalletUsed(seed) {
+	async isWalletUsed(seed, network) {
 		let addr_arr = []
 		for (let i = 0; i < 20; i++) {
 			let address = await this.getNestedAddress({
 				seed,
 				purpose: 44,
-				network: this.network.name == "Mainnet" ? 0 : 1,
+				network: network,
 				account: 0,
 				chain: 0,
 				index: i
 			})
 			addr_arr.push(address)
 		}
-		let result = await axios.get(`${config.btc_api_host}/${this.network.name == "Mainnet" ? "" : "testnet/"}multiaddr?active=${addr_arr.join("|")}`)
+		let result = await axios.get(`${config.btc_api_host}/${network == 0 ? "" : "testnet/"}multiaddr?active=${addr_arr.join("|")}`)
 		return result.data.wallet.n_tx !== 0
 	}
 
@@ -72,10 +64,12 @@ class BtcPlugin {
 	}
 	// Legacy P2PKH
 	async getLegacyAddress(addressConfig) {
+		console.log("===> le", addressConfig)
+
 		try {
 			const BTC_xpub = await this.getPublicKeyBySeed(addressConfig)
 			const node = bip32.fromBase58(BTC_xpub, bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"])
-
+			console.log(node.derive(addressConfig.index).toBase58())
 			return bitcoin.payments.p2pkh({
 				pubkey: node.derive(addressConfig.index).publicKey,
 				network: bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]

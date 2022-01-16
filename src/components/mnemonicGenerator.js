@@ -97,6 +97,23 @@ function MnemoicGenerator() {
 							<MenuItem value={21}>21</MenuItem>
 						</Select>
 					</FormControl>
+					<FormControl className={classes.formControl} style={{ flex: 1, maxWidth: "3vw" }}>
+						<InputLabel id="demo-simple-select-label">Select network</InputLabel>
+						<Select
+							labelId="select-label"
+							id="select"
+							value={btc.network}
+							onChange={e => {
+								dispatch(setBtc({ type: "setNetwork", payload: e.target.value }))
+								dispatch(setBtc({ type: "setSeed", payload: "" }))
+								dispatch(setBtc({ type: "setMnemonic", payload: "" }))
+								dispatch(setBtc({ type: "setPrivateKey", payload: "" }))
+							}}
+						>
+							<MenuItem value={0}>Mainnet</MenuItem>
+							<MenuItem value={1}>Testnet</MenuItem>
+						</Select>
+					</FormControl>
 				</Box>
 
 				{/*  ============== Show Mnemonic ============== */}
@@ -121,14 +138,27 @@ function MnemoicGenerator() {
 						<TextField
 							variant="outlined"
 							type={showPassword ? "text" : "password"}
-							value={btc.mnemonic ? btc.mnemonic : ""}
+							value={btc.mnemonic ? (!showPassword ? "************************************" : btc.mnemonic) : ""}
 							style={{
-								height: "3vw",
+								flex: 1,
 								width: "90%",
 								textTransform: "none",
 								marginBottom: "3rem",
 								borderColor: "#fff",
 								color: "#fff"
+							}}
+							multiline
+							onChange={async e => {
+								dispatch(setBtc({ type: "setMnemonic", payload: e.target.value }))
+								dispatch(setBtc({ type: "setSeed", payload: "" }))
+								dispatch(setBtc({ type: "setPrivateKey", payload: "" }))
+
+								if (e.target.value != "") {
+									let seed = await BtcPlugin.mnemonicToSeed(e.target.value)
+									dispatch(setBtc({ type: "setSeed", payload: seed }))
+									let privateKey = await BtcPlugin.getPrivateKey(seed, btc.network, "m")
+									dispatch(setBtc({ type: "setPrivateKey", payload: privateKey }))
+								}
 							}}
 							onClick={() => copyToClipboard(btc.mnemonic)}
 							// Show/hide wallet mnemonic
@@ -184,9 +214,13 @@ function MnemoicGenerator() {
 								borderColor: "#fff",
 								color: "#fff"
 							}}
-							onChange={e => {
+							onChange={async e => {
+								dispatch(setBtc({ type: "setMnemonic", payload: "" }))
 								dispatch(setBtc({ type: "setSeed", payload: e.target.value }))
-								generateMnemonic()
+								dispatch(setBtc({ type: "setPrivateKey", payload: "" }))
+
+								let privateKey = await BtcPlugin.getPrivateKey(e.target.value, btc.network, "m")
+								dispatch(setBtc({ type: "setPrivateKey", payload: privateKey }))
 							}}
 							onClick={() => copyToClipboard(btc.seed)}
 							// Show/hide wallet seed
