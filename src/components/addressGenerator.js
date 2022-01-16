@@ -170,9 +170,10 @@ function AddressGenerator() {
 			setIsWalletUsed(await BtcPlugin.isWalletUsed(tempAddressConfig.seed, tempAddressConfig.network))
 		} catch (err) {
 			err = err.toString().split(": ")
-			console.log(err)
 			err = err.length > 1 ? err[1] : err.join(" ")
-			setHelperTextError(err.toString())
+			if (tempAddressConfig.network != 1) {
+				setHelperTextError(err.toString())
+			}
 			throw err
 		}
 	}

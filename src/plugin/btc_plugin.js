@@ -64,12 +64,9 @@ class BtcPlugin {
 	}
 	// Legacy P2PKH
 	async getLegacyAddress(addressConfig) {
-		console.log("===> le", addressConfig)
-
 		try {
 			const BTC_xpub = await this.getPublicKeyBySeed(addressConfig)
 			const node = bip32.fromBase58(BTC_xpub, bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"])
-			console.log(node.derive(addressConfig.index).toBase58())
 			return bitcoin.payments.p2pkh({
 				pubkey: node.derive(addressConfig.index).publicKey,
 				network: bitcoin.networks[addressConfig.network == 0 ? "bitcoin" : "testnet"]
