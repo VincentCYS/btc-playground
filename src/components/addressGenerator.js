@@ -24,6 +24,19 @@ const style = {
 	textAlign: "center",
 	borderRadius: 35
 }
+
+const menuProps = {
+	anchorOrigin: {
+		vertical: "bottom",
+		horizontal: "left"
+	},
+	transformOrigin: {
+		vertical: "top",
+		horizontal: "left"
+	},
+	getContentAnchorEl: null
+}
+
 function AddressGenerator() {
 	const mnemonic = useSelector(state => state.btc.mnemonic)
 	let [address, setAddress] = useState([
@@ -211,7 +224,7 @@ function AddressGenerator() {
 						label="Seed"
 						variant="outlined"
 						helperText={(focus == "seed" && helperTextError == "") || addressConfig.seed == "" ? "Please paste your wallet seed (in Hex)" : helperTextError}
-						style={{ marginBottom: "2rem" }}
+						style={{ marginBottom: "3rem" }}
 						onChange={event => {
 							setFocus("seed")
 							setAddressConfig({
@@ -380,8 +393,8 @@ function AddressGenerator() {
 											flex: 1
 										}}
 									>
-										<InputLabel id="demo-simple-select-helper-label">{selector.label}</InputLabel>
-										<Select labelId="demo-simple-select-helper-label" id="demo-simple-select-helper" value={selector.value} label={selector.label} onChange={e => handleChange(e, i)}>
+										<InputLabel>{selector.label}</InputLabel>
+										<Select MenuProps={menuProps} value={selector.value} label={selector.label} onChange={e => handleChange(e, i)}>
 											{selector.items.length > 0
 												? selector.items.map(item => {
 														return <MenuItem value={item.value}>{item.name}</MenuItem>
@@ -421,7 +434,7 @@ function AddressGenerator() {
 							setFocus("account")
 							setAddressConfig({
 								...addressConfig,
-								account: parseInt(event.target.value) >= 0 ? parseInt(event.target.value) : 0
+								account: parseInt(event.target.value) >= 0 ? parseInt(event.target.value) : ""
 							})
 						}}
 						value={addressConfig.account}
@@ -445,7 +458,7 @@ function AddressGenerator() {
 							setFocus("index")
 							setAddressConfig({
 								...addressConfig,
-								index: parseInt(event.target.value) >= 0 ? parseInt(event.target.value) : 0
+								index: parseInt(event.target.value) >= 0 ? parseInt(event.target.value) : ""
 							})
 						}}
 						value={addressConfig.index}

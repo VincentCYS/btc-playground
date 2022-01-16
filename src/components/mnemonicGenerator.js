@@ -30,6 +30,18 @@ const useStyles = makeStyles(theme => ({
 	}
 }))
 
+const menuProps = {
+	anchorOrigin: {
+		vertical: "bottom",
+		horizontal: "left"
+	},
+	transformOrigin: {
+		vertical: "top",
+		horizontal: "left"
+	},
+	getContentAnchorEl: null
+}
+
 function MnemoicGenerator() {
 	const classes = useStyles()
 
@@ -78,12 +90,13 @@ function MnemoicGenerator() {
 					}}
 				>
 					{/*  ============== Mnemonic word count selector ============== */}
-					<FormControl className={classes.formControl} style={{ flex: 1, maxWidth: "3vw" }}>
-						<InputLabel id="demo-simple-select-label">Select word count</InputLabel>
+					<FormControl className={classes.formControl} style={{ flex: 1, maxWidth: "3vw" }} variant="standard">
+						<InputLabel>Select word count</InputLabel>
 						<Select
 							labelId="select-label"
 							id="select"
 							value={btc.wordCount}
+							MenuProps={menuProps}
 							onChange={e => {
 								dispatch(setBtc({ type: "setWordCount", payload: e.target.value }))
 								dispatch(setBtc({ type: "setSeed", payload: "" }))
@@ -98,11 +111,12 @@ function MnemoicGenerator() {
 						</Select>
 					</FormControl>
 					<FormControl className={classes.formControl} style={{ flex: 1, maxWidth: "3vw" }}>
-						<InputLabel id="demo-simple-select-label">Select network</InputLabel>
+						<InputLabel>Select network</InputLabel>
 						<Select
 							labelId="select-label"
 							id="select"
 							value={btc.network}
+							MenuProps={menuProps}
 							onChange={e => {
 								dispatch(setBtc({ type: "setNetwork", payload: e.target.value }))
 								dispatch(setBtc({ type: "setSeed", payload: "" }))
@@ -117,18 +131,19 @@ function MnemoicGenerator() {
 				</Box>
 
 				{/*  ============== Show Mnemonic ============== */}
+
 				<Container
 					style={{
 						display: "flex",
 						flexDirection: "column",
-						marginBottom: "1rem"
+						marginBottom: 15
 					}}
 				>
 					<Typography
 						style={{
 							color: "#10AFAE",
 							textAlign: "start",
-							marginTop: "3rem"
+							marginTop: "1.5rem"
 						}}
 						variant="caption"
 					>
@@ -143,7 +158,6 @@ function MnemoicGenerator() {
 								flex: 1,
 								width: "90%",
 								textTransform: "none",
-								marginBottom: "3rem",
 								borderColor: "#fff",
 								color: "#fff"
 							}}
@@ -188,7 +202,7 @@ function MnemoicGenerator() {
 					style={{
 						display: "flex",
 						flexDirection: "column",
-						marginBottom: "3rem"
+						marginBottom: 15
 					}}
 				>
 					<Typography
@@ -242,7 +256,7 @@ function MnemoicGenerator() {
 					style={{
 						display: "flex",
 						flexDirection: "column",
-						marginBottom: "6rem"
+						marginBottom: "4rem"
 					}}
 				>
 					<Typography
