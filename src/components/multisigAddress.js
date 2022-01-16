@@ -196,7 +196,7 @@ function multisigAddress() {
 					}}
 					onClick={() => generateMultisigAddress()}
 				>
-					Generate
+					Generate Address
 				</Button>
 			</Container>
 

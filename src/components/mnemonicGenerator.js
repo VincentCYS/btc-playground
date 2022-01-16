@@ -35,6 +35,7 @@ function MnemoicGenerator() {
 
 	const [tooltipText, setTooltipText] = useState("Copy to clipboard")
 	const [showPassword, setShowPassword] = useState(false)
+	const [showGenerateTooltip, setShowGenerateTooltip] = useState(false)
 	const handleClickShowPassword = () => setShowPassword(!showPassword)
 	const handleMouseDownPassword = () => setShowPassword(!showPassword)
 
@@ -253,18 +254,23 @@ function MnemoicGenerator() {
 						/>
 					</Tooltip>
 				</Container>
-				<Button
-					variant="contained"
-					style={{
-						backgroundColor: "#10AFAE",
-						borderRadius: 25,
-						maxWidth: "20rem",
-						alignSelf: "center"
-					}}
-					onClick={() => generateMnemonic()}
-				>
-					Generate
-				</Button>
+				<Tooltip title={"Address changed!"} aria-label={"Address changed!"} arrow open={showGenerateTooltip} onClose={() => setTimeout(() => setShowGenerateTooltip(false), 500)}>
+					<Button
+						variant="contained"
+						style={{
+							backgroundColor: "#10AFAE",
+							borderRadius: 25,
+							maxWidth: "20rem",
+							alignSelf: "center"
+						}}
+						onClick={() => {
+							generateMnemonic()
+							setShowGenerateTooltip(true)
+						}}
+					>
+						Generate Mnemonic
+					</Button>
+				</Tooltip>
 			</Container>
 		</ThemeProvider>
 	)

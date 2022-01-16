@@ -130,7 +130,8 @@ function AddressGenerator() {
 	}
 
 	async function getAddress(tempAddressConfig) {
-		let derivePath = `m/${tempAddressConfig.purpose}'/${tempAddressConfig.network}'/${tempAddressConfig.account}'/${tempAddressConfig.chain}/${tempAddressConfig.index}`
+		let derivePath = tempAddressConfig.derivePath != "" && showAdvanced ? tempAddressConfig.derivePath : `m/${tempAddressConfig.purpose}'/${tempAddressConfig.network}'/${tempAddressConfig.account}'/${tempAddressConfig.chain}/${tempAddressConfig.index}`
+		tempAddressConfig.network = tempAddressConfig.derivePath != "" && showAdvanced ? tempAddressConfig.derivePath.split("/")[2].slice(0, 1) : tempAddressConfig.network
 		try {
 			// Get address list
 			let addressList = []
@@ -218,7 +219,7 @@ function AddressGenerator() {
 					/>
 
 					{/* ================ Easy version derive path ================ */}
-					{showDerivePathSelector()}
+					{!showAdvanced ? showDerivePathSelector() : null}
 
 					<div
 						style={{
@@ -249,23 +250,33 @@ function AddressGenerator() {
 
 					{/* ================ Advanced derive path ================ */}
 					{showAdvanced ? (
-						<TextField
-							error={focus == "derivePath" && helperTextError != "" && addressConfig.derivePath != ""}
-							id="outlined-basic"
-							variant="outlined"
-							label="Derive path"
-							style={{ width: "100%" }}
-							helperText={(focus == "derivePath" && helperTextError == "") || addressConfig.derivePath == "" ? "Derive path: m / purpose' / coin' /	account'	/ chain	 / address" : helperTextError}
-							onChange={event => {
-								setFocus("derivePath")
+						<div style={{ textAlign: "start" }}>
+							<Typography
+								style={{
+									color: "red"
+								}}
+								variant="caption"
+							>
+								Warning: This is an advanced feature and should only be used if you understand what it does.
+							</Typography>
+							<TextField
+								error={focus == "derivePath" && helperTextError != "" && addressConfig.derivePath != ""}
+								id="outlined-basic"
+								variant="outlined"
+								label="Derive path"
+								style={{ width: "100%", marginTop: 15 }}
+								helperText={(focus == "derivePath" && helperTextError == "") || addressConfig.derivePath == "" ? "Derive path: m / purpose' / coin' /	account'	/ chain	 / address" : helperTextError}
+								onChange={event => {
+									setFocus("derivePath")
 
-								setAddressConfig({
-									...addressConfig,
-									derivePath: event.target.value
-								})
-							}}
-							value={addressConfig.derivePath || `m/${addressConfig.purpose}'/${addressConfig.network}'/${addressConfig.chain}'/${addressConfig.account}/${addressConfig.index}`}
-						/>
+									setAddressConfig({
+										...addressConfig,
+										derivePath: event.target.value
+									})
+								}}
+								value={addressConfig.derivePath || `m/${addressConfig.purpose}'/${addressConfig.network}'/${addressConfig.chain}'/${addressConfig.account}/${addressConfig.index}`}
+							/>
+						</div>
 					) : null}
 				</Grid>
 				{address.length > 0 && addressConfig.seed != "" ? <Divider variant="middle" style={{ marginTop: 40, marginBottom: 40, backgroundColor: "#fff" }} /> : null}
