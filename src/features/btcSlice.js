@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit"
-const bitcoin = require("bitcoinjs-lib")
 
 export const btcSlice = createSlice({
 	name: "btc",

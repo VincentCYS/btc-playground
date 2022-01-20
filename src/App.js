@@ -50,7 +50,7 @@ function App() {
 			.then(seed => {
 				dispatch(setBtc({ type: "setSeed", payload: seed }))
 			})
-			.catch(err => console.log(err))
+			.catch(err => {})
 	}
 
 	// Re-generate mnemonic if network is changed

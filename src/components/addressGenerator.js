@@ -187,7 +187,6 @@ function AddressGenerator() {
 			if (tempAddressConfig.network != 1) {
 				setHelperTextError(err.toString())
 			}
-			throw err
 		}
 	}
 

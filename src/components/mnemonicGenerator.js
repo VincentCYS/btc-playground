@@ -55,6 +55,7 @@ function MnemoicGenerator() {
 	const dispatch = useDispatch()
 
 	async function copyToClipboard(text) {
+		console.log(text)
 		if (text != "") {
 			await navigator.clipboard.writeText(text)
 			setTooltipText("Copied!")

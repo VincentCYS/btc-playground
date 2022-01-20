@@ -21,10 +21,12 @@ class BtcPlugin {
 			})
 	}
 	async getPrivateKey(seed, network, derivePath) {
-		let hdMaster = bip32.fromSeed(Buffer.from(seed, "hex"), bitcoin.networks[network])
+		try {
+			let hdMaster = bip32.fromSeed(Buffer.from(seed, "hex"), bitcoin.networks[network])
 
-		const BTC_prv = derivePath && derivePath != "m" ? hdMaster.derivePath(derivePath).toBase58() : hdMaster.toBase58()
-		return BTC_prv
+			const BTC_prv = derivePath && derivePath != "m" ? hdMaster.derivePath(derivePath).toBase58() : hdMaster.toBase58()
+			return BTC_prv
+		} catch (err) {}
 	}
 
 	// Account gap limit check
